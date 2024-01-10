@@ -1,0 +1,1 @@
+{"scanners": {"trivy": 10, "grype": 10, "docker_scout": 10, "depscan": 10}}
