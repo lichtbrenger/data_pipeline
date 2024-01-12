@@ -24,7 +24,7 @@ def get_cvss(scanner_name):
     test = open('./results/cvss_severity_levels.json','r')
     test2 = json.load(test)
 
-    tset = open(f'./results/results_{scanner_name}.json','r')
+    tset = open(f'./results/overview/results_{scanner_name}.json','r')
     tset2 = json.load(tset)
 
     cvss_list = []
@@ -36,32 +36,24 @@ def get_cvss(scanner_name):
     severity_levels = count_cvss(cvss_list)
     return severity_levels
 
-
-def graph_severity_levels():
-    scanners = ['trivy','grype','docker_scout']
+def graph_cvss_level(level):
     trivy_cvss = get_cvss('trivy')
     grype_cvss = get_cvss('grype')
     docker_scout_cvss = get_cvss('docker_scout')
-    sev_levels = {
-        'Low': np.array([trivy_cvss[0], grype_cvss[0], docker_scout_cvss[0]]),
-        'Medium': np.array([trivy_cvss[1], grype_cvss[1], docker_scout_cvss[1]]),
-        'High': np.array([trivy_cvss[2], grype_cvss[2], docker_scout_cvss[2]]),
-        'Critical': np.array([trivy_cvss[3], grype_cvss[3], docker_scout_cvss[3]]),
-    }
-    width = 0.6  # the width of the bars: can also be len(x) sequence
+    scanners = np.array(['Trivy', 'Grype', 'Docker Scout'])
+    levels = np.array([trivy_cvss[level], grype_cvss[level], docker_scout_cvss[level]])
+    small_percentiles = [trivy_cvss[level], grype_cvss[level], docker_scout_cvss[level]] 
 
-    fig, ax = plt.subplots()
-    bottom = np.zeros(3)
 
-    for level, amount in sev_levels.items():
-        p = ax.bar(scanners, amount, width, label=level, bottom=bottom)
-        bottom += amount
+    fig, ax1 = plt.subplots(figsize=(9, 7), layout='constrained')
+    ax1.set_xlabel('amount of vulnerabilities')
+    rects = plt.barh(scanners, levels, align='center', height=0.3, color='tan')
+    ax1.bar_label(rects, small_percentiles,
+                  padding=-64, color='white', fontweight='bold')
+    ax1.xaxis.grid(True, linestyle='--', which='major',
+                   color='black', alpha=.25)
+    
+    plt.savefig(f'cvss_level_{level}.png')
 
-        ax.bar_label(p, label_type='center')
-
-    ax.set_title('CVSS levels')
-    ax.legend()
-
-    plt.show()
-
-graph_severity_levels()
+# accepts 0,1,2,3 -> 'low','medium,'high','critical'
+graph_cvss_level(3)
