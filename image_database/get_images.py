@@ -1,3 +1,4 @@
+#  crediting base web scraper: https://github.com/collabnix/hubscraper/
 # Base Libraries 
 import os
 import time
